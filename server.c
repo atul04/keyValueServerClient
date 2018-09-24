@@ -3,7 +3,7 @@
  * @Date:   2018-09-24T23:37:30+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-24T23:41:17+05:30
+ * @Last modified time: 2018-09-24T23:49:12+05:30
  */
 
  // Server side C/C++ program to demonstrate Socket programming
@@ -20,7 +20,7 @@
      struct sockaddr_in address;
      int opt = 1;
      int addrlen = sizeof(address);
-     char buffer[1024] = {0};
+     char buffer[1024] = {0};  
      char *hello = "Hello from server";
 
      // Creating socket file descriptor

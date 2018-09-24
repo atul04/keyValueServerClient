@@ -3,7 +3,7 @@
  * @Date:   2018-09-24T23:41:57+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-24T23:42:00+05:30
+ * @Last modified time: 2018-09-24T23:49:07+05:30
  */
 
  // Client side C/C++ program to demonstrate Socket programming
@@ -29,7 +29,7 @@
 
      memset(&serv_addr, '0', sizeof(serv_addr));
 
-     serv_addr.sin_family = AF_INET;
+     serv_addr.sin_family = AF_INET;  
      serv_addr.sin_port = htons(PORT);
 
      // Convert IPv4 and IPv6 addresses from text to binary form
