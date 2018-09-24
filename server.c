@@ -1,67 +1,53 @@
 /**
  * @Author: Atul Sahay <atul>
- * @Date:   2018-09-24T23:37:30+05:30
+ * @Date:   2018-09-24T19:18:06+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-24T23:49:12+05:30
+ * @Last modified time: 2018-09-24T19:18:27+05:30
  */
 
- // Server side C/C++ program to demonstrate Socket programming
- #include <unistd.h>
- #include <stdio.h>
- #include <sys/socket.h>
- #include <stdlib.h>
- #include <netinet/in.h>
- #include <string.h>
- #define PORT 8080
- int main(int argc, char const *argv[])
- {
-     int server_fd, new_socket, valread;
-     struct sockaddr_in address;
-     int opt = 1;
-     int addrlen = sizeof(address);
-     char buffer[1024] = {0};  
-     char *hello = "Hello from server";
 
-     // Creating socket file descriptor
-     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
-     {
-         perror("socket failed");
-         exit(EXIT_FAILURE);
-     }
 
-     // Forcefully attaching socket to the port 8080
-     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-                                                   &opt, sizeof(opt)))
-     {
-         perror("setsockopt");
-         exit(EXIT_FAILURE);
-     }
-     address.sin_family = AF_INET;
-     address.sin_addr.s_addr = INADDR_ANY;
-     address.sin_port = htons( PORT );
+/*Required Headers*/
 
-     // Forcefully attaching socket to the port 8080
-     if (bind(server_fd, (struct sockaddr *)&address,
-                                  sizeof(address))<0)
-     {
-         perror("bind failed");
-         exit(EXIT_FAILURE);
-     }
-     if (listen(server_fd, 3) < 0)
-     {
-         perror("listen");
-         exit(EXIT_FAILURE);
-     }
-     if ((new_socket = accept(server_fd, (struct sockaddr *)&address,
-                        (socklen_t*)&addrlen))<0)
-     {
-         perror("accept");
-         exit(EXIT_FAILURE);
-     }
-     valread = read( new_socket , buffer, 1024);
-     printf("%s\n",buffer );
-     send(new_socket , hello , strlen(hello) , 0 );
-     printf("Hello message sent\n");
-     return 0;
- }
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <stdio.h>
+#include<string.h>
+
+int main()
+{
+
+    char str[100];
+    int listen_fd, comm_fd;
+
+    struct sockaddr_in servaddr;
+
+    listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+
+    bzero( &servaddr, sizeof(servaddr));
+
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = htons(INADDR_ANY);
+    servaddr.sin_port = htons(22000);
+
+    bind(listen_fd, (struct sockaddr *) &servaddr, sizeof(servaddr));
+
+    listen(listen_fd, 10);
+
+    comm_fd = accept(listen_fd, (struct sockaddr*) NULL, NULL);
+
+    while(1)
+    {
+
+        bzero( str, 100);
+
+        read(comm_fd,str,100);
+
+        printf("Echoing back - %s",str);
+
+        write(comm_fd, str, strlen(str)+1);
+
+    }
+}

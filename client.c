@@ -1,52 +1,45 @@
 /**
  * @Author: Atul Sahay <atul>
- * @Date:   2018-09-24T23:41:57+05:30
+ * @Date:   2018-09-25T00:04:29+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-24T23:49:07+05:30
+ * @Last modified time: 2018-09-24T19:18:56+05:30
  */
 
- // Client side C/C++ program to demonstrate Socket programming
- #include <stdio.h>
- #include <sys/socket.h>
- #include <stdlib.h>
- #include <netinet/in.h>
- #include <string.h>
- #define PORT 8080
 
- int main(int argc, char const *argv[])
- {
-     struct sockaddr_in address;
-     int sock = 0, valread;
-     struct sockaddr_in serv_addr;
-     char *hello = "Hello from client";
-     char buffer[1024] = {0};
-     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-     {
-         printf("\n Socket creation error \n");
-         return -1;
-     }
 
-     memset(&serv_addr, '0', sizeof(serv_addr));
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <stdio.h>
+#include<string.h>
 
-     serv_addr.sin_family = AF_INET;  
-     serv_addr.sin_port = htons(PORT);
+int main(int argc,char **argv)
+{
+    int sockfd,n;
+    char sendline[100];
+    char recvline[100];
+    struct sockaddr_in servaddr;
 
-     // Convert IPv4 and IPv6 addresses from text to binary form
-     if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)
-     {
-         printf("\nInvalid address/ Address not supported \n");
-         return -1;
-     }
+    sockfd=socket(AF_INET,SOCK_STREAM,0);
+    bzero(&servaddr,sizeof servaddr);
 
-     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-     {
-         printf("\nConnection Failed \n");
-         return -1;
-     }
-     send(sock , hello , strlen(hello) , 0 );
-     printf("Hello message sent\n");
-     valread = read( sock , buffer, 1024);
-     printf("%s\n",buffer );
-     return 0;
- }
+    servaddr.sin_family=AF_INET;
+    servaddr.sin_port=htons(22000);
+
+    inet_pton(AF_INET,"127.0.0.1",&(servaddr.sin_addr));
+
+    connect(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
+
+    while(1)
+    {
+        bzero( sendline, 100);
+        bzero( recvline, 100);
+        fgets(sendline,100,stdin); /*stdin = 0 , for standard input */
+
+        write(sockfd,sendline,strlen(sendline)+1);
+        read(sockfd,recvline,100);
+        printf("%s",recvline);
+    }
+
+}
