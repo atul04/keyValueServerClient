@@ -3,7 +3,7 @@
  * @Date:   2018-09-25T00:04:29+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-25T17:07:08+05:30
+ * @Last modified time: 2018-09-25T20:58:47+05:30
  */
 
 
@@ -28,7 +28,7 @@ int main(int argc,char **argv)
 {
 
     int sockfd,n;
-    char sendline[100];
+    char sendline[10000];
     char recvline[100];
     struct sockaddr_in servaddr;
 
@@ -41,10 +41,10 @@ int main(int argc,char **argv)
     if(argc == 2)
     {
         printf("Welcome to Interactive Mode\n");
-        int tokenCount=0;
         int i =0;
         while(true)
         {
+            int tokenCount=0;
             printf("->");
             bzero(line, MAX_INPUT_SIZE);
             fgets(line,MAX_INPUT_SIZE,stdin);
@@ -67,7 +67,7 @@ int main(int argc,char **argv)
                     strcpy(portStr,tokens[2]);
                     // for string to int
                     int port;
-                    sscanf(str, "%d", &port);
+                    sscanf(portStr, "%d", &port);
 
                     sockfd=socket(AF_INET,SOCK_STREAM,0);
                     bzero(&servaddr,sizeof servaddr);
@@ -77,9 +77,14 @@ int main(int argc,char **argv)
 
                     inet_pton(AF_INET,address,&(servaddr.sin_addr));
 
-                    connect(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
-                    activeConn = true;
-                    printf("ok Connection made\n");
+                    if(connect(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr))<0)
+                    {
+                        printf("\nConnection Failed \n");
+                    }
+                    else{
+                        activeConn = true;
+                        printf("ok Connection made\n");
+                    }
                 }
 
                 else{
@@ -102,11 +107,100 @@ int main(int argc,char **argv)
             }
             else if(strncmp(tokens[0],"create",6)==0)
             {
+                if(activeConn){
+                    bool present = false;
+                    strcpy(sendline,"create");
+                    write(sockfd,sendline,strlen(sendline)+1);
+                    read(sockfd,recvline,100);
+                    printf("%s\n",recvline);
 
+                    strcpy(sendline,tokens[1]);
+                    write(sockfd,sendline,strlen(sendline)+1);
+                    read(sockfd,recvline,100);
+                    printf("%s\n",recvline);
+
+                    if(strncmp(recline,"present",7) == 0)
+                    {
+                        present=true;
+                        printf("Error: key is already present\n");
+                    }
+                    if(!present){
+                        strcpy(sendline,tokens[2]);
+                        write(sockfd,sendline,strlen(sendline)+1);
+                        read(sockfd,recvline,100);
+                        printf("%s\n",recvline);
+
+                        int i = 3;
+
+                        while(i<tokenCount){
+                            strcpy(sendline,tokens[i]);
+                            write(sockfd,sendline,strlen(sendline)+1);
+                            n = read(sockfd,recvline,100);
+                            printf("%s\n",recvline);
+                            i+=1;
+                        }
+                        n = read(sockfd,recvline,100);
+                        printf("%s\n",recline);
+                    }
+                }
+                else{
+                    printf("No active connection present\n");
+                }
             }
             else if(strncmp(tokens[0],"read",4)==0)
             {
+                if(activeConn){
+                    bool present = true;
+                    strcpy(sendline,"read");
+                    write(sockfd,sendline,strlen(sendline)+1);
+                    read(sockfd,recvline,100);
+                    printf("%s\n",recvline);
 
+                    strcpy(sendline,tokens[1]);
+                    write(sockfd,sendline,strlen(sendline)+1);
+                    read(sockfd,recvline,100);
+                    printf("%s\n",recvline);
+
+                    if(strncmp(recline,"not",3) == 0)
+                    {
+                        present=false;
+                        printf("Error: key is not present\n");
+                    }
+                    if(present){
+                      int size;
+                      char buffer[256];
+                      bzero(buffer,256);
+                      n = read(sock,buffer,255);
+                      sscanf(buffer, "%d", &size);
+                      printf("%s\n",buffer);
+
+                      int bytesRead = 0;
+                      int bytesToRead =size+1;
+                      int readThisTime;
+                      char *buffer = (char *)malloc(bytesToRead*sizeof(char));
+
+                      while (bytesToRead != bytesRead)
+                      {
+                          do
+                          {
+                               readThisTime = read(sockfd, buffer + bytesRead, (bytesToRead - bytesRead));
+                          }
+                          while(readThisTime == -1);
+
+                          if (readThisTime == -1)
+                          {
+                              /* Real error. Do something appropriate. */
+                              return;
+                          }
+                          bytesRead += readThisTime;
+                      }
+
+                      printf("TEXT : %s\n",buffer);
+                    }
+                }
+                else{
+                    printf("No active connection present\n");
+                }
             }
             else if(strncmp(tokens[0],"update",6)==0)
             {

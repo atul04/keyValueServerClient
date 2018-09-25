@@ -3,7 +3,7 @@
  * @Date:   2018-09-24T19:32:51+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-25T15:26:23+05:30
+ * @Last modified time: 2018-09-25T20:52:36+05:30
  */
 
 
@@ -114,7 +114,7 @@
  * @Email:  atulsahay01@gmail.com
  * @Filename: newUpdate.c
  * @Last modified by:   atul
- * @Last modified time: 2018-09-25T15:26:23+05:30
+ * @Last modified time: 2018-09-25T20:52:36+05:30
  */
 
  /*
@@ -160,6 +160,8 @@
   int written;
   int queue_count;
   int numT;
+  char **hashTable;
+  int *bitmap;
 
   // Networking Things
   int sockfd, newsockfd, portno, clilen;
@@ -170,29 +172,121 @@
         int n;
         char buffer[256];
         bzero(buffer,256);
+        int tokenCount = 0;
         while(1){
-          n = read(sock,buffer,255);
-          char bufferText[1024];
-          snprintf(bufferText, sizeof(bufferText), "I got your message from thread %d\n", thread_id);
+            n = read(sock,buffer,255);
+            tokenCount+=1;
+            char bufferText[1024];
+            //snprintf(bufferText, sizeof(bufferText), "I got your message from thread %d\n", thread_id);
 
-          if(strncmp(buffer,"bye",3)==0)
-          {
-              printf("%s from client %d\n","Connnection closed",(int)(sock-3));
-              n = write(sock,"Connection Terminated\n",100);
-              break;
-          }
-          if (n < 0) {
-             perror("ERROR reading from socket");
-             break;
-          }
+            if(strncmp(buffer,"bye",3)==0)
+            {
+                printf("%s from client %d\n","Connnection closed",(int)(sock-3));
+                n = write(sock,"Connection Terminated\n",100);
+                break;
+            }
+            if (n < 0) {
+               perror("ERROR reading from socket");
+               break;
+            }
 
-          printf("Thread_id :%d From Client :%d Here is the message: %s\n",thread_id,(int)(sock-3),buffer);
-          n = write(sock,bufferText,100);
+            printf("Thread_id :%d From Client :%d Here is the message: %s\n",thread_id,(int)(sock-3),buffer);
+            //n = write(sock,bufferText,100);
 
-          if (n < 0) {
-             perror("ERROR writing to socket");
-             break;
-           }
+            // if (n < 0) {
+            //    perror("ERROR writing to socket");
+            //    break;
+            //  }
+            if(strncmp(buffer,"create",6)==0)
+            {
+                int key, size;
+                bool present = false;
+                snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **CREATE** command\n", thread_id);
+                n = write(sock,bufferText,strlen(bufferText)+1);
+                bzero(buffer,256);
+                n = read(sock,buffer,255);
+                sscanf(buffer, "%d", &key);
+                printf("%s size--->%d\n",buffer,n-1);
+                if(bitmap[key]==0)
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
+                else{
+                    snprintf(bufferText, sizeof(bufferText), "present\n");
+                    present = true;
+                }
+                printf("%s\n",bufferText);
+                n = write(sock,bufferText,strlen(bufferText)+1);
+
+                if(!present){
+                    // value size
+                    bzero(buffer,256);
+                    n = read(sock,buffer,255);
+                    sscanf(buffer, "%d", &size);
+                    printf("%s size--->%d\n",buffer,n-1);
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
+                    printf("%s\n",bufferText);
+                    n = write(sock,bufferText,strlen(bufferText)+1);
+
+                    int bytesRead = 0;
+                    int bytesToRead =size+1;
+                    int readThisTime;
+                    char *buffer = (char *)malloc(bytesToRead*sizeof(char));
+
+                    while (bytesToRead != bytesRead)
+                    {
+                        do
+                        {
+                             readThisTime = read(sock, buffer + bytesRead, (bytesToRead - bytesRead));
+                        }
+                        while(readThisTime == -1);
+
+                        if (readThisTime == -1)
+                        {
+                            /* Real error. Do something appropriate. */
+                            return;
+                        }
+                        bytesRead += readThisTime;
+                    }
+                    printf("Buffer :->%s\n",buffer);
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
+                    printf("%s\n",bufferText);
+                    n = write(sock,bufferText,strlen(bufferText)+1);
+                    hashTable[key] = buffer;
+                    bitmap[key] = 1;
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Ok: added\n", thread_id,buffer);
+                    n = write(sock,bufferText,strlen(bufferText)+1);
+                }
+            }
+
+            if(strncmp(buffer,"read",4)==0)
+            {
+                int key;
+                bool present = false;
+                snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **READ** command\n", thread_id);
+                n = write(sock,bufferText,strlen(bufferText)+1);
+                bzero(buffer,256);
+                n = read(sock,buffer,255);
+                sscanf(buffer, "%d", &key);
+                printf("%s size--->%d\n",buffer,n-1);
+                if(bitmap[key]==0)
+                    snprintf(bufferText, sizeof(bufferText), "not\n");
+                else{
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
+                    present = true;
+                }
+                printf("%s\n",bufferText);
+                n = write(sock,bufferText,strlen(bufferText)+1);
+
+                if(present){
+                    // value size
+                    int size = strlen(hashTable[key])
+                    snprintf(bufferText, sizeof(bufferText), "%d\n",size);
+                    printf("%s\n",bufferText);
+                    n = write(sock,bufferText,strlen(bufferText)+1);
+                    n = write(sock,hashTable[key],size+1);
+                }
+            }
+
+
          }
          close(sock);
     }
@@ -365,6 +459,9 @@
      listen(sockfd,5);
      clilen = sizeof(cli_addr);
 
+     hashTable = (char **)malloc(10000008*sizeof(char *));
+     bitmap = (int *)malloc(10000008*sizeof(int *));
+     memset(bitmap, 0, sizeof(bitmap));
     // Ends here
 
     // Ids for every pthread
