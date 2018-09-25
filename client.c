@@ -3,7 +3,7 @@
  * @Date:   2018-09-25T00:04:29+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-24T19:43:02+05:30
+ * @Last modified time: 2018-09-25T15:08:52+05:30
  */
 
 
@@ -25,7 +25,7 @@ int main(int argc,char **argv)
     bzero(&servaddr,sizeof servaddr);
 
     servaddr.sin_family=AF_INET;
-    servaddr.sin_port=htons(5001);
+    servaddr.sin_port=htons(5002);
 
     inet_pton(AF_INET,"127.0.0.1",&(servaddr.sin_addr));
 
