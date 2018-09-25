@@ -3,7 +3,7 @@
  * @Date:   2018-09-25T00:04:29+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-25T20:58:47+05:30
+ * @Last modified time: 2018-09-26T00:22:38+05:30
  */
 
 
@@ -119,7 +119,7 @@ int main(int argc,char **argv)
                     read(sockfd,recvline,100);
                     printf("%s\n",recvline);
 
-                    if(strncmp(recline,"present",7) == 0)
+                    if(strncmp(recvline,"present",7) == 0)
                     {
                         present=true;
                         printf("Error: key is already present\n");
@@ -140,7 +140,7 @@ int main(int argc,char **argv)
                             i+=1;
                         }
                         n = read(sockfd,recvline,100);
-                        printf("%s\n",recline);
+                        printf("%s\n",recvline);
                     }
                 }
                 else{
@@ -155,35 +155,38 @@ int main(int argc,char **argv)
                     write(sockfd,sendline,strlen(sendline)+1);
                     read(sockfd,recvline,100);
                     printf("%s\n",recvline);
-
                     strcpy(sendline,tokens[1]);
                     write(sockfd,sendline,strlen(sendline)+1);
                     read(sockfd,recvline,100);
                     printf("%s\n",recvline);
 
-                    if(strncmp(recline,"not",3) == 0)
+                    if(strncmp(recvline,"not",3) == 0)
                     {
                         present=false;
                         printf("Error: key is not present\n");
                     }
                     if(present){
+                      unsigned int length;
                       int size;
                       char buffer[256];
                       bzero(buffer,256);
-                      n = read(sock,buffer,255);
+                      n=read(sockfd,buffer,255);
+                      printf("%d\n",n);
                       sscanf(buffer, "%d", &size);
-                      printf("%s\n",buffer);
-
+                      printf("size = %d\n",size);
+                      char dummy[10];
+                      bzero(dummy,10);
+                      n=write(sockfd,dummy,strlen(dummy)+1);
                       int bytesRead = 0;
                       int bytesToRead =size+1;
                       int readThisTime;
-                      char *buffer = (char *)malloc(bytesToRead*sizeof(char));
-
+                      char *bufferRead = (char *)malloc(bytesToRead*sizeof(char));
+                      bzero(bufferRead,size+1);
                       while (bytesToRead != bytesRead)
                       {
                           do
                           {
-                               readThisTime = read(sockfd, buffer + bytesRead, (bytesToRead - bytesRead));
+                               readThisTime = read(sockfd, bufferRead + bytesRead, (bytesToRead - bytesRead));
                           }
                           while(readThisTime == -1);
 
@@ -192,10 +195,11 @@ int main(int argc,char **argv)
                               /* Real error. Do something appropriate. */
                               return;
                           }
+                          printf("%d\n",readThisTime);
                           bytesRead += readThisTime;
                       }
 
-                      printf("TEXT : %s\n",buffer);
+                      printf("TEXT : %s\n",bufferRead);
                     }
                 }
                 else{

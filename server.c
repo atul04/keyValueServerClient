@@ -3,7 +3,7 @@
  * @Date:   2018-09-24T19:32:51+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-25T20:52:36+05:30
+ * @Last modified time: 2018-09-26T00:02:51+05:30
  */
 
 
@@ -114,7 +114,7 @@
  * @Email:  atulsahay01@gmail.com
  * @Filename: newUpdate.c
  * @Last modified by:   atul
- * @Last modified time: 2018-09-25T20:52:36+05:30
+ * @Last modified time: 2018-09-26T00:02:51+05:30
  */
 
  /*
@@ -278,11 +278,14 @@
 
                 if(present){
                     // value size
-                    int size = strlen(hashTable[key])
+                    int size = strlen(hashTable[key]);
                     snprintf(bufferText, sizeof(bufferText), "%d\n",size);
                     printf("%s\n",bufferText);
                     n = write(sock,bufferText,strlen(bufferText)+1);
+                    char dummy[100];
+                    n = read(sock,dummy,strlen(dummy)+1);
                     n = write(sock,hashTable[key],size+1);
+                    printf("%s\n",hashTable[key]);
                 }
             }
 
