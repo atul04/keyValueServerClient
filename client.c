@@ -3,7 +3,7 @@
  * @Date:   2018-09-25T00:04:29+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-26T00:22:38+05:30
+ * @Last modified time: 2018-09-26T12:18:46+05:30
  */
 
 
@@ -208,11 +208,76 @@ int main(int argc,char **argv)
             }
             else if(strncmp(tokens[0],"update",6)==0)
             {
+                if(activeConn){
+                    bool present = true;
+                    strcpy(sendline,"update");
+                    write(sockfd,sendline,strlen(sendline)+1);
+                    read(sockfd,recvline,100);
+                    printf("%s\n",recvline);
 
+                    strcpy(sendline,tokens[1]);
+                    write(sockfd,sendline,strlen(sendline)+1);
+                    read(sockfd,recvline,100);
+                    printf("%s\n",recvline);
+
+                    if(strncmp(recvline,"not",3) == 0)
+                    {
+                        present=false;
+                        printf("Error: key is not present\n");
+                    }
+                    if(present){
+                        strcpy(sendline,tokens[2]);
+                        write(sockfd,sendline,strlen(sendline)+1);
+                        read(sockfd,recvline,100);
+                        printf("%s\n",recvline);
+
+                        int i = 3;
+
+                        while(i<tokenCount){
+                            strcpy(sendline,tokens[i]);
+                            write(sockfd,sendline,strlen(sendline)+1);
+                            n = read(sockfd,recvline,100);
+                            printf("%s\n",recvline);
+                            i+=1;
+                        }
+                        n = read(sockfd,recvline,100);
+                        printf("%s\n",recvline);
+                    }
+                }
+                else{
+                    printf("No active connection present\n");
+                }
             }
             else if(strncmp(tokens[0],"delete",6)==0)
             {
+                if(activeConn){
+                    bool present = true;
+                    strcpy(sendline,"delete");
+                    write(sockfd,sendline,strlen(sendline)+1);
+                    read(sockfd,recvline,100);
+                    printf("%s\n",recvline);
+                    strcpy(sendline,tokens[1]);
+                    write(sockfd,sendline,strlen(sendline)+1);
+                    read(sockfd,recvline,100);
+                    printf("%s\n",recvline);
 
+                    if(strncmp(recvline,"not",3) == 0)
+                    {
+                        present=false;
+                        printf("Error: key is not present\n");
+                    }
+                    if(present){
+                      unsigned int length;
+                      int size;
+                      char buffer[256];
+                      bzero(buffer,256);
+                      n=read(sockfd,buffer,255);
+                      printf("%s\n",buffer);
+                    }
+                }
+                else{
+                    printf("No active connection present\n");
+                }
             }
             else
             {

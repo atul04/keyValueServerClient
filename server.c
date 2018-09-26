@@ -3,7 +3,7 @@
  * @Date:   2018-09-24T19:32:51+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-26T00:02:51+05:30
+ * @Last modified time: 2018-09-26T12:12:46+05:30
  */
 
 
@@ -114,7 +114,7 @@
  * @Email:  atulsahay01@gmail.com
  * @Filename: newUpdate.c
  * @Last modified by:   atul
- * @Last modified time: 2018-09-26T00:02:51+05:30
+ * @Last modified time: 2018-09-26T12:12:46+05:30
  */
 
  /*
@@ -257,7 +257,7 @@
                 }
             }
 
-            if(strncmp(buffer,"read",4)==0)
+            else if(strncmp(buffer,"read",4)==0)
             {
                 int key;
                 bool present = false;
@@ -289,6 +289,93 @@
                 }
             }
 
+            else if(strncmp(buffer,"update",6)==0)
+            {
+                int key, size;
+                bool present = true;
+                snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **UPDATE** command\n", thread_id);
+                n = write(sock,bufferText,strlen(bufferText)+1);
+                bzero(buffer,256);
+                n = read(sock,buffer,255);
+                sscanf(buffer, "%d", &key);
+                printf("%s size--->%d\n",buffer,n-1);
+                if(bitmap[key]==1)
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
+                else{
+                    snprintf(bufferText, sizeof(bufferText), "not\n");
+                    present = false;
+                }
+                printf("%s\n",bufferText);
+                n = write(sock,bufferText,strlen(bufferText)+1);
+
+                if(present){
+                    // value size
+                    bzero(buffer,256);
+                    n = read(sock,buffer,255);
+                    sscanf(buffer, "%d", &size);
+                    printf("%s size--->%d\n",buffer,n-1);
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
+                    printf("%s\n",bufferText);
+                    n = write(sock,bufferText,strlen(bufferText)+1);
+
+                    int bytesRead = 0;
+                    int bytesToRead =size+1;
+                    int readThisTime;
+                    char *buffer = (char *)malloc(bytesToRead*sizeof(char));
+
+                    while (bytesToRead != bytesRead)
+                    {
+                        do
+                        {
+                             readThisTime = read(sock, buffer + bytesRead, (bytesToRead - bytesRead));
+                        }
+                        while(readThisTime == -1);
+
+                        if (readThisTime == -1)
+                        {
+                            /* Real error. Do something appropriate. */
+                            return;
+                        }
+                        bytesRead += readThisTime;
+                    }
+                    printf("Buffer :->%s\n",buffer);
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
+                    printf("%s\n",bufferText);
+                    n = write(sock,bufferText,strlen(bufferText)+1);
+                    hashTable[key] = buffer;
+                    bitmap[key] = 1;
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Ok: updated\n", thread_id,buffer);
+                    n = write(sock,bufferText,strlen(bufferText)+1);
+                }
+            }
+
+            else if(strncmp(buffer,"delete",6)==0)
+            {
+                int key;
+                bool present = true;
+                snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **DELETE** command\n", thread_id);
+                n = write(sock,bufferText,strlen(bufferText)+1);
+                bzero(buffer,256);
+                n = read(sock,buffer,255);
+                sscanf(buffer, "%d", &key);
+                printf("%s size--->%d\n",buffer,n-1);
+                if(bitmap[key]==1)
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
+                else{
+                    snprintf(bufferText, sizeof(bufferText), "not\n");
+                    present = false;
+                }
+                printf("%s\n",bufferText);
+                n = write(sock,bufferText,strlen(bufferText)+1);
+
+                if(present){
+                    free(hashTable[key]);
+                    hashTable[key]=NULL;
+                    bitmap[key]=0;
+                    snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Ok: Deleted\n", thread_id,buffer);
+                    n = write(sock,bufferText,strlen(bufferText)+1);
+                }
+            }
 
          }
          close(sock);
