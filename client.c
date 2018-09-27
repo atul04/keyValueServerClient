@@ -3,7 +3,7 @@
  * @Date:   2018-09-25T00:04:29+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-26T12:18:46+05:30
+ * @Last modified time: 2018-09-27T15:52:07+05:30
  */
 
 
@@ -99,6 +99,7 @@ int main(int argc,char **argv)
                     write(sockfd,sendline,strlen(sendline)+1);
                     read(sockfd,recvline,100);
                     printf("%s\n",recvline);
+                    activeConn = false;
                 }
                 else
                 {
@@ -193,7 +194,7 @@ int main(int argc,char **argv)
                           if (readThisTime == -1)
                           {
                               /* Real error. Do something appropriate. */
-                              return;
+                              return 0;
                           }
                           printf("%d\n",readThisTime);
                           bytesRead += readThisTime;
