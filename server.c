@@ -3,7 +3,7 @@
  * @Date:   2018-09-24T19:32:51+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-09-27T16:37:20+05:30
+ * @Last modified time: 2018-10-01T20:35:18+05:30
  */
 
 
@@ -114,7 +114,7 @@
  * @Email:  atulsahay01@gmail.com
  * @Filename: newUpdate.c
  * @Last modified by:   atul
- * @Last modified time: 2018-09-27T16:37:20+05:30
+ * @Last modified time: 2018-10-01T20:35:18+05:30
  */
 
  /*
@@ -152,6 +152,7 @@
   #define SLEEP_NANOSEC_PROD 100
   #define SLEEP_NANOSEC_CONS 100
 
+  /////////////////////      Global definitions
   pthread_mutex_t mutex;
   pthread_cond_t condc, condp;
 
@@ -162,17 +163,155 @@
   int readcount,writer_waiting;
   // Ends here
 
+  // Buffer vars are written here...............
   int buffer[MAXBUFFERSIZE];
   int front,rear;
   int written;
   int queue_count;
   int numT;
+  /* Hashtable is used for global access of the key value pairs
+   pointer to pointer is used to have char array of pointers so that dynamic allocation
+  of keys can be done*/
   char **hashTable;
-  int *bitmap;
+  int *bitmap; /* Whether that particular key is present or not */
 
-  // Networking Things
+  // Networking Things (Socket Programming essentials)
   int sockfd, newsockfd, portno, clilen;
   struct sockaddr_in serv_addr, cli_addr;
+  //////////////////////////////////////////ENDS:::: Global definitions
+
+  //******************************** Funtion declarations*************************//
+
+  //********************** Read Instruction is performed here *******************//
+  void readInstruction(char buffer[], int sock, int thread_id);
+  //******************* All data base modification is done *********************//
+  void modifyInstruction(char buffer[], int sock, int thread_id);
+
+  // *****************  Locks and Unlocks Methods*********************/
+  void readLock(int thread_id);
+  void readUnLock(int thread_id);
+  void writeLock(int thread_id);
+  void writeUnLock(int thread_id);
+
+  //-------------- Query Processing --------------------------------//
+  void doprocessing (int sock, int thread_id);
+  // Buffer insertion and deletion is defined here
+  void insert(int value);
+  int release();
+  // Clean up routine is presented however it is incomplete
+  void cleanup_routine();
+  /* producer stores the incomming connection in the buffer so that consumer thread cleanup_routine
+  act upon it */
+  void* producer(void *ptr);
+  /* pops the socket from the queue and do the necessary operations on the request of user*/
+  void* consumer(void *ptr);
+
+
+  //******************************* Driver function
+  int main(int argc, char **argv) {
+    front = 0;
+    rear = -1;
+    queue_count = 0;
+    written=0;
+    numT=0;
+    //for data  Processing
+    writer_present = false;
+    writer_waiting = 0;
+    readcount = 0; // how many readers are present
+    // Initialize the mutex and condition variables
+    pthread_mutex_init(&Pmutex, NULL);
+    pthread_cond_init(&reader_can_enter, NULL);		/* Initialize reader condition variable */
+    pthread_cond_init(&writer_can_enter, NULL);		/* Initialize writer condition variable */
+    // Ends
+    pthread_t pro, con1,con2,con3,con4; // Pthreads
+
+    // Networking things
+
+     /* First call to socket() function */
+     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+     if (sockfd < 0) {
+        perror("ERROR opening socket");
+        exit(1);
+     }
+
+     int enable = 1;
+     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+        perror("setsockopt(SO_REUSEADDR) failed");
+     /* Initialize socket structure */
+     bzero((char *) &serv_addr, sizeof(serv_addr));
+     // portno = 5002;
+     // Command line address and portno is passed
+     char address[1024];
+     char portStr[1024];
+     strcpy(address,argv[1]);
+     strcpy(portStr,argv[2]);
+     // for string to int
+     int port;
+     sscanf(portStr, "%d", &port);
+     // int address;
+     // sscanf(addressStr, "%d", &address);
+
+     serv_addr.sin_family = AF_INET;
+     // address.sin_addr.s_addr = INADDR_ANY;
+     serv_addr.sin_addr.s_addr = inet_addr(address);
+     serv_addr.sin_port = htons(port);
+
+     /* Now bind the host address using bind() call.*/
+     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+        perror("ERROR on binding");
+        exit(1);
+     }
+
+     /* Now start listening for the clients, here
+        * process will go in sleep mode and will wait
+        * for the incoming connection
+     */
+
+     listen(sockfd,5);
+     clilen = sizeof(cli_addr);
+
+     hashTable = (char **)malloc(10000008*sizeof(char *));
+     bitmap = (int *)malloc(10000008*sizeof(int *));
+     memset(bitmap, 0, sizeof(bitmap));
+    // Ends here
+
+    // Ids for every pthread
+    int prod_thread_id = 0;
+    int con1_thread_id = 1;
+    int con2_thread_id = 2;
+    int con3_thread_id = 3;
+    int con4_thread_id = 4;
+
+    // Initialize the mutex and condition variables
+    pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&condc, NULL);		/* Initialize consumer condition variable */
+    pthread_cond_init(&condp, NULL);		/* Initialize producer condition variable */
+    // Creation of threads
+    pthread_create(&pro, NULL, producer, (void *)&prod_thread_id);
+    pthread_create(&con3, NULL, consumer, (void *)&con3_thread_id);
+    pthread_create(&con4, NULL, consumer, (void *)&con4_thread_id);
+    pthread_create(&con2, NULL, consumer, (void *)&con2_thread_id);
+    pthread_create(&con1, NULL, consumer, (void *)&con1_thread_id);
+
+    sleep(1000);
+    printf("Captured Error: Resources not allocated\n");
+    // // For threads to join (Once they complete their tasks)
+    // pthread_join(&con1, NULL);
+    // pthread_join(&con2, NULL);
+    // pthread_join(&con3, NULL);
+    // pthread_join(&con4, NULL);
+    // pthread_join(&pro, NULL);
+
+
+    pthread_mutex_destroy(&mutex);	/* Free up the_mutex */
+    pthread_cond_destroy(&condc);		/* Free up consumer condition variable */
+    pthread_cond_destroy(&condp);		/* Free up producer condition variable */
+
+  }
+
+
+  // Functions definition are written Here
 
   //********************** Read Instruction is performed here *******************//
   void readInstruction(char buffer[], int sock, int thread_id)
@@ -367,7 +506,7 @@
 
   }
 
-  // *****************  Locks and Unlocks Methods
+  // *****************  Locks and Unlocks Methods*********************/
   void readLock(int thread_id)
   {
       pthread_mutex_lock(&Pmutex); // mutex lock to access buffer
@@ -416,6 +555,7 @@
       pthread_mutex_unlock(&Pmutex);
   }
 
+
   //-------------- Query Processing --------------------------------//
   void doprocessing (int sock, int thread_id) {
         int n;
@@ -461,7 +601,7 @@
   //
   // Networking Ends here
 
-
+  // Buffer insertion and deletion is defined here
   void insert(int value)
   {
      rear=(rear+1)%MAXBUFFERSIZE;
@@ -480,6 +620,7 @@
      return data;
   }
 
+  // Clean up routine is presented however it is incomplete
   void cleanup_routine()
   {
     pthread_mutex_destroy(&mutex);	/* Free up the_mutex */
@@ -490,6 +631,9 @@
     printf("**************DONE COLLECTING THREADS******************\n");
     kill(pid,SIGTERM);
   }
+
+  /* producer stores the incomming connection in the buffer so that consumer thread cleanup_routine
+  act upon it */
   void* producer(void *ptr) {
     int newsockfd;
     int thread_id = *((int *)ptr); // for thread id
@@ -524,7 +668,7 @@
       // Optional sleep for the master, so that worker can get extra time for
       // processing
       struct timespec delay;
-      delay.tv_sec = 1;
+      delay.tv_sec = 0.2;
       delay.tv_nsec = SLEEP_NANOSEC_PROD;
       nanosleep(&delay, NULL);
     }
@@ -541,6 +685,7 @@
     //pthread_exit(NULL);
   }
 
+  /* pops the socket from the queue and do the necessary operations on the request of user*/
   void* consumer(void *ptr) {
     int newsockfd,data;
     int thread_id = *((int *)ptr);
@@ -583,95 +728,4 @@
       cleanup_routine();
     }
     //pthread_exit(NULL);
-  }
-
-  int main(int argc, char **argv) {
-    front = 0;
-    rear = -1;
-    queue_count = 0;
-    written=0;
-    numT=0;
-    //for data  Processing
-    writer_present = false;
-    writer_waiting = 0;
-    readcount = 0;
-    // Initialize the mutex and condition variables
-    pthread_mutex_init(&Pmutex, NULL);
-    pthread_cond_init(&reader_can_enter, NULL);		/* Initialize reader condition variable */
-    pthread_cond_init(&writer_can_enter, NULL);		/* Initialize writer condition variable */
-    // Ends
-    pthread_t pro, con1,con2,con3,con4; // Pthreads
-
-    // Networking things
-
-     /* First call to socket() function */
-     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-
-     if (sockfd < 0) {
-        perror("ERROR opening socket");
-        exit(1);
-     }
-
-     int enable = 1;
-     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
-        perror("setsockopt(SO_REUSEADDR) failed");
-     /* Initialize socket structure */
-     bzero((char *) &serv_addr, sizeof(serv_addr));
-     portno = 5002;
-
-     serv_addr.sin_family = AF_INET;
-     serv_addr.sin_addr.s_addr = INADDR_ANY;
-     serv_addr.sin_port = htons(portno);
-
-     /* Now bind the host address using bind() call.*/
-     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-        perror("ERROR on binding");
-        exit(1);
-     }
-
-     /* Now start listening for the clients, here
-        * process will go in sleep mode and will wait
-        * for the incoming connection
-     */
-
-     listen(sockfd,5);
-     clilen = sizeof(cli_addr);
-
-     hashTable = (char **)malloc(10000008*sizeof(char *));
-     bitmap = (int *)malloc(10000008*sizeof(int *));
-     memset(bitmap, 0, sizeof(bitmap));
-    // Ends here
-
-    // Ids for every pthread
-    int prod_thread_id = 0;
-    int con1_thread_id = 1;
-    int con2_thread_id = 2;
-    int con3_thread_id = 3;
-    int con4_thread_id = 4;
-
-    // Initialize the mutex and condition variables
-    pthread_mutex_init(&mutex, NULL);
-    pthread_cond_init(&condc, NULL);		/* Initialize consumer condition variable */
-    pthread_cond_init(&condp, NULL);		/* Initialize producer condition variable */
-    // Creation of threads
-    pthread_create(&pro, NULL, producer, (void *)&prod_thread_id);
-    pthread_create(&con3, NULL, consumer, (void *)&con3_thread_id);
-    pthread_create(&con4, NULL, consumer, (void *)&con4_thread_id);
-    pthread_create(&con2, NULL, consumer, (void *)&con2_thread_id);
-    pthread_create(&con1, NULL, consumer, (void *)&con1_thread_id);
-
-    sleep(1000);
-    printf("Captured Error: Resources not allocated\n");
-    // // For threads to join (Once they complete their tasks)
-    // pthread_join(&con1, NULL);
-    // pthread_join(&con2, NULL);
-    // pthread_join(&con3, NULL);
-    // pthread_join(&con4, NULL);
-    // pthread_join(&pro, NULL);
-
-
-    pthread_mutex_destroy(&mutex);	/* Free up the_mutex */
-    pthread_cond_destroy(&condc);		/* Free up consumer condition variable */
-    pthread_cond_destroy(&condp);		/* Free up producer condition variable */
-
   }
