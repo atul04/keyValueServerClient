@@ -1,0 +1,232 @@
+Thread comes to play id: 4
+Thread comes to play id: 3
+Thread comes to play id: 2
+Thread comes to play id: 1
+Producer: Written 4 Current Buffer size 1
+Thread 4 Consumed 4 Current Buffer size 0
+Thread_id :4 From Client :1 Here is the message: create
+Thread 3 goes to sleep
+Thread 2 goes to sleep
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+Thread 1 goes to sleep
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+Buffer :->a
+FROM THREAD :4 Recieved **a** 
+
+Thread_id :4 From Client :1 Here is the message: create
+2 size--->1
+FROM THREAD :4 Recieved **2** 
+
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+Buffer :->b
+FROM THREAD :4 Recieved **b** 
+
+Thread_id :4 From Client :1 Here is the message: create
+3 size--->1
+FROM THREAD :4 Recieved **3** 
+
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+Buffer :->c
+FROM THREAD :4 Recieved **c** 
+
+Thread_id :4 From Client :1 Here is the message: create
+4 size--->1
+FROM THREAD :4 Recieved **4** 
+
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+Buffer :->d
+FROM THREAD :4 Recieved **d** 
+
+Thread_id :4 From Client :1 Here is the message: create
+5 size--->1
+FROM THREAD :4 Recieved **5** 
+
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+Buffer :->e
+FROM THREAD :4 Recieved **e** 
+
+Thread_id :4 From Client :1 Here is the message: read
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+1
+
+a
+Thread_id :4 From Client :1 Here is the message: read
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+1
+
+a
+Thread_id :4 From Client :1 Here is the message: read
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+1
+
+a
+Thread_id :4 From Client :1 Here is the message: read
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+1
+
+a
+Thread_id :4 From Client :1 Here is the message: read
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+1
+
+a
+Thread_id :4 From Client :1 Here is the message: read
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+1
+
+a
+Thread_id :4 From Client :1 Here is the message: read
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+1
+
+a
+Thread_id :4 From Client :1 Here is the message: read
+2 size--->1
+FROM THREAD :4 Recieved **2** 
+
+1
+
+b
+Thread_id :4 From Client :1 Here is the message: read
+3 size--->1
+FROM THREAD :4 Recieved **3** 
+
+1
+
+c
+Thread_id :4 From Client :1 Here is the message: read
+3 size--->1
+FROM THREAD :4 Recieved **3** 
+
+1
+
+c
+Thread_id :4 From Client :1 Here is the message: read
+3 size--->1
+FROM THREAD :4 Recieved **3** 
+
+1
+
+c
+Thread_id :4 From Client :1 Here is the message: read
+2 size--->1
+FROM THREAD :4 Recieved **2** 
+
+1
+
+b
+Thread_id :4 From Client :1 Here is the message: read
+2 size--->1
+FROM THREAD :4 Recieved **2** 
+
+1
+
+b
+Thread_id :4 From Client :1 Here is the message: read
+3 size--->1
+FROM THREAD :4 Recieved **3** 
+
+1
+
+c
+Thread_id :4 From Client :1 Here is the message: read
+4 size--->1
+FROM THREAD :4 Recieved **4** 
+
+1
+
+d
+Thread_id :4 From Client :1 Here is the message: read
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+1
+
+a
+Thread_id :4 From Client :1 Here is the message: read
+2 size--->1
+FROM THREAD :4 Recieved **2** 
+
+1
+
+b
+Thread_id :4 From Client :1 Here is the message: read
+2 size--->1
+FROM THREAD :4 Recieved **2** 
+
+1
+
+Producer: Written 5 Current Buffer size 1
+Thread 3 starts executing
+Thread 3 Consumed 5 Current Buffer size 0
+Thread_id :3 From Client :2 Here is the message: read
+Thread 2 starts executing
+Thread 2 goes to sleep
+Thread 1 starts executing
+Thread 1 goes to sleep
+19 size--->2
+not
+
+Thread_id :3 From Client :2 Here is the message: read
+10 size--->2
+not
+
+Thread_id :3 From Client :2 Here is the message: read
+1 size--->1
+FROM THREAD :3 Recieved **1** 
+
+1
+
+b
+Thread_id :4 From Client :1 Here is the message: create
+Thread 4 goes to sleep: Modifying
+a
+Thread 0 start executing again; Modifying
+Thread_id :3 From Client :2 Here is the message: read
+Thread 3 goes to sleep: Reading
+6 size--->1
+FROM THREAD :4 Recieved **6** 
+
+1 size--->1
+FROM THREAD :4 Recieved **1** 
+
+Buffer :->f
+FROM THREAD :4 Recieved **f** 
+
+Thread 0 start executing again; Reading
+1 size--->1
+FROM THREAD :3 Recieved **1** 
+
+1
+
+Thread_id :4 From Client :1 Here is the message: create
+Thread 4 goes to sleep: Modifying
+a
+Thread_id :3 From Client :2 Here is the message: read
+Thr

@@ -1,0 +1,27 @@
+connect 127.0.0.1 5002
+create 1 1 a
+create 2 1 b
+create 3 1 c
+create 4 1 d
+create 5 1 e
+read 1
+read 1
+read 1
+read 1
+read 1
+read 1
+read 1
+read 2
+read 3
+read 3
+read 3
+read 2
+read 2
+read 3
+read 4
+read 1
+read 2
+read 2
+create 6 1 f
+create 7 1 g
+disconnect
