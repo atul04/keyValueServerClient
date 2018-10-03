@@ -3,7 +3,7 @@
  * @Date:   2018-09-25T00:04:29+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-10-01T18:34:58+05:30
+ * @Last modified time: 2018-10-03T20:59:40+05:30
  */
 
 
@@ -17,9 +17,9 @@
 #include <stdlib.h>
 
 // Maximum input size from the interactive mode or batch mode
-#define MAX_INPUT_SIZE 1024
-#define MAX_TOKEN_SIZE 64
-#define MAX_NUM_TOKENS 64
+#define MAX_INPUT_SIZE 1000000000
+#define MAX_TOKEN_SIZE 1000000000
+#define MAX_NUM_TOKENS 10000000
 
 //tokenize the input string
 char **tokenize(char *line);
@@ -33,6 +33,40 @@ struct sockaddr_in servaddr; /* structure where all connection related things ar
 void parser(char **tokens);
 void lineByline(FILE * file);
 char * readline(FILE *fp, char *buffer);
+char * readMy()
+{
+
+      int ch;
+      int i = 0;
+      size_t buff_len = 0;
+
+      char *buffer = (char *)malloc(buff_len + 1);
+      if (!buffer) return NULL;  // Out of memory
+
+      while ((ch = fgetc(stdin)) != '\n' && ch != EOF)
+      {
+          buff_len++;
+          void *tmp = realloc(buffer, buff_len + 1);
+          if (tmp == NULL)
+          {
+              free(buffer);
+              return NULL; // Out of memory
+          }
+          buffer = tmp;
+
+          buffer[i] = (char) ch;
+          i++;
+      }
+      buffer[i] = '\0';
+
+      // Detect end
+      if (ch == EOF && (i == 0 || ferror(stdin)))
+      {
+          free(buffer);
+          return NULL;
+      }
+      return buffer;
+}
 ////////////////////////////////////
 int main(int argc,char **argv)
 {
@@ -45,7 +79,7 @@ int main(int argc,char **argv)
     // whether the client have an active connection or not
     bool activeConn = false;
 
-    char  line[MAX_INPUT_SIZE];
+    char  *line = (char *)malloc(MAX_INPUT_SIZE*sizeof(char));
     char **tokens;
 
     // To select between batch and interactive mood
@@ -58,6 +92,7 @@ int main(int argc,char **argv)
             int tokenCount=0;
             printf("->");
             bzero(line, MAX_INPUT_SIZE);
+            // line = readMy();
             fgets(line,MAX_INPUT_SIZE,stdin);
             line[strlen(line)] = '\n'; //terminate with new line
             tokens = tokenize(line);
@@ -86,8 +121,8 @@ int main(int argc,char **argv)
 
 /**************** Parsing the commands ***********/
 void parser(char **tokens){
-  char sendline[10000];
-  char recvline[100];
+  char *sendline =(char*)malloc(100000*sizeof(char));
+  char *recvline =(char*)malloc(100000*sizeof(char));
   int n,i;          /* n for storing the reuturn values of each query made to the server*/
   int tokenCount = 0;
 
@@ -167,20 +202,39 @@ void parser(char **tokens){
               printf("Error: key is already present\n");
           }
           if(!present){
+              sendline=(char *)malloc(strlen(tokens[2])*sizeof(char));
               strcpy(sendline,tokens[2]);
               write(sockfd,sendline,strlen(sendline)+1);
               read(sockfd,recvline,100);
               printf("%s\n",recvline);
 
               int i = 3;
-
-              while(i<tokenCount){
-                  strcpy(sendline,tokens[i]);
-                  write(sockfd,sendline,strlen(sendline)+1);
-                  n = read(sockfd,recvline,100);
-                  printf("%s\n",recvline);
+              int totalStrLen = 0;
+              while(i<tokenCount)
+              {
+                  totalStrLen+=strlen(tokens[i]);
+                  totalStrLen+=1;
+                  i++;
+              }
+              sendline = (char *)malloc(totalStrLen*sizeof(char));
+              i=3;
+              while(i<tokenCount)
+              {
+                  strcat(sendline,tokens[i]);
+                  strcat(sendline," ");
                   i+=1;
               }
+              printf("%s\n",sendline);
+              write(sockfd,sendline,strlen(sendline)+1);
+              n = read(sockfd,recvline,100);
+              printf("%s\n",recvline);
+              // while(i<tokenCount){
+              //     strcpy(sendline,tokens[i]);
+              //     write(sockfd,sendline,strlen(sendline)+1);
+              //     n = read(sockfd,recvline,100);
+              //     printf("%s\n",recvline);
+              //     i+=1;
+              // }
               n = read(sockfd,recvline,100);
               printf("%s\n",recvline);
           }
@@ -268,6 +322,7 @@ void parser(char **tokens){
               printf("Error: key is not present\n");
           }
           if(present){
+
               strcpy(sendline,tokens[2]);
               write(sockfd,sendline,strlen(sendline)+1);
               read(sockfd,recvline,100);
@@ -373,7 +428,7 @@ void lineByline(FILE * file){
   char **tokens;
   int i;
   int tokenCount=0;
-  char  line[MAX_INPUT_SIZE];
+  char  *line = (char *)malloc(MAX_INPUT_SIZE*sizeof(char));
 
   char sendline[10000];
   char recvline[100];
@@ -385,7 +440,8 @@ void lineByline(FILE * file){
   struct sockaddr_in servaddr;
 
   while ((s = readline(file, 0)) != NULL){
-      bzero(line, MAX_INPUT_SIZE);
+      line=(char *)malloc(strlen(s)*sizeof(char));
+      bzero(line, strlen(line));
       strcpy(line,s);
       line[strlen(line)] = '\n'; //terminate with new line
       puts(line);
