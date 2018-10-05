@@ -3,7 +3,7 @@
  * @Date:   2018-09-24T19:32:51+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-10-01T20:35:18+05:30
+ * @Last modified time: 2018-10-05T14:36:55+05:30
  */
 
 
@@ -114,7 +114,7 @@
  * @Email:  atulsahay01@gmail.com
  * @Filename: newUpdate.c
  * @Last modified by:   atul
- * @Last modified time: 2018-10-01T20:35:18+05:30
+ * @Last modified time: 2018-10-05T14:36:55+05:30
  */
 
  /*
@@ -352,7 +352,7 @@
   void modifyInstruction(char buffer[], int sock, int thread_id)
   {
       // commnon vars
-      char bufferText[1024];
+      char bufferText[100000];
       int n;
 
       // Choices start here ...............................
