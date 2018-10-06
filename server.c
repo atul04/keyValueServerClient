@@ -3,7 +3,7 @@
  * @Date:   2018-09-24T19:32:51+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-10-05T17:00:15+05:30
+ * @Last modified time: 2018-10-06T19:46:58+05:30
  */
 
  /*
@@ -543,6 +543,7 @@
              pthread_cond_wait(&condp, &mutex);
              printf("Producer start executing\n");
       }
+      pthread_mutex_unlock(&mutex);
       // // inserts the number in buffer
       // if(written==MAXITERATIONS-1){
       //   pthread_cond_broadcast(&condc);
@@ -555,13 +556,18 @@
          perror("ERROR on accept");
          exit(1);
       }
+      pthread_mutex_lock(&mutex);
       insert(newsockfd);
+
       printf("Producer: Written %d Current Buffer size %d\n",newsockfd,queue_count);
       //close(newsockfd);
       // broadcast signal for the consumer to print number
+      // while(queue_count==2){
+      //     pthread_cond_broadcast(&condc);
+      //     pthread_mutex_unlock(&mutex);
+      // }
       pthread_cond_broadcast(&condc);
       pthread_mutex_unlock(&mutex);
-
       // Optional sleep for the master, so that worker can get extra time for
       // processing
       struct timespec delay;
@@ -602,7 +608,7 @@
       // }
       newsockfd = release();
       printf("Thread %d Consumed %d Current Buffer size %d\n",thread_id,newsockfd,queue_count);
-      // doprocessing(newsockfd,thread_id); { when nothing works do this}
+      // doprocessing(newsockfd,thread_id); //{ when nothing works do this}
       pthread_cond_broadcast(&condc);
       pthread_cond_signal(&condp);
       pthread_mutex_unlock(&mutex);
