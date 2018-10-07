@@ -3,7 +3,7 @@
  * @Date:   2018-10-06T20:05:51+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-10-06T20:37:47+05:30
+ * @Last modified time: 2018-10-07T15:07:17+05:30
  */
 
 /*
@@ -228,7 +228,7 @@
        bzero(buffer,256);
        n = read(sock,buffer,255);
        sscanf(buffer, "%lld", &key);
-       printf("%s size--->%lld\n",buffer,n-1);
+       printf("%s size--->%d\n",buffer,n-1);
        if(bitmap.count(key)==0)
            snprintf(bufferText, sizeof(bufferText), "not\n");
        else{
@@ -269,7 +269,7 @@
            bzero(buffer,256);
            n = read(sock,buffer,255);
            sscanf(buffer, "%lld", &key);
-           printf("%s size--->%lld\n",buffer,n-1);
+           printf("%s size--->%d\n",buffer,n-1);
            if(bitmap.count(key)==0)
                snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
            else{
@@ -315,7 +315,7 @@
                n = write(sock,bufferText,strlen(bufferText)+1);
                hashTable[key] = buffer;
                bitmap[key] = 1;
-               snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Ok: added\n", thread_id,buffer);
+               snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Ok: added\n", thread_id);
                n = write(sock,bufferText,strlen(bufferText)+1);
            }
        }
@@ -330,7 +330,7 @@
            bzero(buffer,256);
            n = read(sock,buffer,255);
            sscanf(buffer, "%lld", &key);
-           printf("%s size--->%lld\n",buffer,n-1);
+           printf("%s size--->%d\n",buffer,n-1);
            if(bitmap.count(key)==1)
                snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
            else{
@@ -376,7 +376,7 @@
                n = write(sock,bufferText,strlen(bufferText)+1);
                hashTable[key] = buffer;
                bitmap[key] = 1;
-               snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Ok: updated\n", thread_id,buffer);
+               snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Ok: updated\n", thread_id);
                n = write(sock,bufferText,strlen(bufferText)+1);
            }
        }
@@ -390,7 +390,7 @@
            bzero(buffer,256);
            n = read(sock,buffer,255);
            sscanf(buffer, "%lld", &key);
-           printf("%s size--->%lld\n",buffer,n-1);
+           printf("%s size--->%d\n",buffer,n-1);
            if(bitmap.count(key)==1)
                snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Recieved **%s** \n", thread_id,buffer);
            else{
@@ -404,7 +404,7 @@
                free(hashTable[key]);
                hashTable.erase(key);
                bitmap.erase(key);
-               snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Ok: Deleted\n", thread_id,buffer);
+               snprintf(bufferText, sizeof(bufferText), "FROM THREAD :%d Ok: Deleted\n", thread_id);
                n = write(sock,bufferText,strlen(bufferText)+1);
            }
        }
@@ -419,7 +419,7 @@
               // If buffer gets full time for producer to rest
               printf("Thread %d goes to sleep: Reading\n",thread_id);
               pthread_cond_wait(&reader_can_enter, &Pmutex);
-              printf("Thread %d start executing again; Reading\n");
+              printf("Thread %d start executing again; Reading\n",thread_id);
        }
        readcount+=1;
        pthread_mutex_unlock(&Pmutex);
@@ -442,7 +442,7 @@
               // If buffer gets full time for producer to rest
               printf("Thread %d goes to sleep: Modifying\n",thread_id);
               pthread_cond_wait(&writer_can_enter, &Pmutex);
-              printf("Thread %d start executing again; Modifying\n");
+              printf("Thread %d start executing again; Modifying\n",thread_id);
        }
        writer_waiting-=1;
        writer_present = true;
