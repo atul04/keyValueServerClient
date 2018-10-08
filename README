@@ -1,0 +1,12 @@
+1.For server
+  compile: g++ -o server server.cpp -pthread_t
+  execute: ./server 127.0.0.1 5002
+  Note: ip and port should passed as cmd line arguements
+
+2.For Client
+  compile: gcc -o client client.c
+  execute: (1) for interactive
+               : ./client interactive
+           (2) for batch
+               : ./client batch batch.txt
+          Note : file should be passed

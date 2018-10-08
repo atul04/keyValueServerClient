@@ -3,7 +3,7 @@
  * @Date:   2018-09-25T00:04:29+05:30
  * @Email:  atulsahay01@gmail.com
  * @Last modified by:   atul
- * @Last modified time: 2018-10-05T15:52:32+05:30
+ * @Last modified time: 2018-10-07T15:44:41+05:30
  */
 
 
@@ -33,40 +33,42 @@ struct sockaddr_in servaddr; /* structure where all connection related things ar
 void parser(char **tokens);
 void lineByline(FILE * file);
 char * readline(FILE *fp, char *buffer);
-char * readMy()
-{
 
-      int ch;
-      int i = 0;
-      size_t buff_len = 0;
-
-      char *buffer = (char *)malloc(buff_len + 1);
-      if (!buffer) return NULL;  // Out of memory
-
-      while ((ch = fgetc(stdin)) != '\n' && ch != EOF)
-      {
-          buff_len++;
-          void *tmp = realloc(buffer, buff_len + 1);
-          if (tmp == NULL)
-          {
-              free(buffer);
-              return NULL; // Out of memory
-          }
-          buffer = tmp;
-
-          buffer[i] = (char) ch;
-          i++;
-      }
-      buffer[i] = '\0';
-
-      // Detect end
-      if (ch == EOF && (i == 0 || ferror(stdin)))
-      {
-          free(buffer);
-          return NULL;
-      }
-      return buffer;
-}
+/**** function I tried to read line by line not worked accordingly****/
+// char * readMy()
+// {
+//
+//       int ch;
+//       int i = 0;
+//       size_t buff_len = 0;
+//
+//       char *buffer = (char *)malloc(buff_len + 1);
+//       if (!buffer) return NULL;  // Out of memory
+//
+//       while ((ch = fgetc(stdin)) != '\n' && ch != EOF)
+//       {
+//           buff_len++;
+//           void *tmp = realloc(buffer, buff_len + 1);
+//           if (tmp == NULL)
+//           {
+//               free(buffer);
+//               return NULL; // Out of memory
+//           }
+//           buffer = tmp;
+//
+//           buffer[i] = (char) ch;
+//           i++;
+//       }
+//       buffer[i] = '\0';
+//
+//       // Detect end
+//       if (ch == EOF && (i == 0 || ferror(stdin)))
+//       {
+//           free(buffer);
+//           return NULL;
+//       }
+//       return buffer;
+// }
 ////////////////////////////////////
 int main(int argc,char **argv)
 {
@@ -98,7 +100,7 @@ int main(int argc,char **argv)
             tokens = tokenize(line);
             parser(tokens);
             int i;
-            //do whatever you want with the commands, here we just print them
+            //Freeing up the acquired space by the tokens
             for(i=0;tokens[i]!=NULL;i++){
                 free(tokens[i]);
             }
@@ -138,7 +140,7 @@ void parser(char **tokens){
   bzero(recvline,MAX_INPUT_SIZE);
   //do whatever you want with the commands, here we just print them
   for(i=0;tokens[i]!=NULL;i++){
-     printf("found token %s\n", tokens[i]);
+     // printf("found token %s\n", tokens[i]);
      tokenCount++;
   }
 
@@ -235,7 +237,7 @@ void parser(char **tokens){
                   i+=1;
               }
               sendline[strlen(sendline)-1]=0;
-              printf("%s \nsize:%d\n",sendline,strlen(sendline));
+              printf("\nYour text ::::-> %s \n\nText size:%ld\n\n",sendline,strlen(sendline));
               write(sockfd,sendline,strlen(sendline)+1);
 
               n = read(sockfd,recvline,10000);
@@ -282,9 +284,9 @@ void parser(char **tokens){
             char buffer[256];
             bzero(buffer,256);
             n=read(sockfd,buffer,255);
-            printf("%d\n",n);
+            // printf("%d\n",n);
             sscanf(buffer, "%d", &size);
-            printf("size = %d\n",size);
+            printf("Read: Got size value from the server= %d\n",size);
             char dummy[10];
             bzero(dummy,10);
             n=write(sockfd,dummy,strlen(dummy)+1);
@@ -306,11 +308,11 @@ void parser(char **tokens){
                     /* Real error. Do something appropriate. */
                     return 0;
                 }
-                printf("%d\n",readThisTime);
+                // printf("%d\n",readThisTime);
                 bytesRead += readThisTime;
             }
 
-            printf("TEXT : %s\n",bufferRead);
+            printf("RECEIVED TEXT : %s\n",bufferRead);
           }
       }
       else{
@@ -353,7 +355,7 @@ void parser(char **tokens){
             }
             bzero(sendline,MAX_INPUT_SIZE);
             i=3;
-            printf("%s\n","Going to count now" );
+            // printf("%s\n","Going to count now" );
             while(i<tokenCount)
             {
                 strcat(sendline,tokens[i]);
@@ -361,7 +363,7 @@ void parser(char **tokens){
                 i+=1;
             }
             sendline[strlen(sendline)-1]=0;
-            printf("%s \nsize:%d\n",sendline,strlen(sendline));
+            printf("\nText Read:::-> %s \n\nText size: %ld\n\n",sendline,strlen(sendline));
             write(sockfd,sendline,strlen(sendline)+1);
 
             n = read(sockfd,recvline,10000);
@@ -476,16 +478,16 @@ void lineByline(FILE * file){
   struct sockaddr_in servaddr;
 
   while ((s = readline(file, 0)) != NULL){
-      printf("s--->%s\n",s);
+      printf("Command ---> %s\n",s);
       bzero(line, MAX_INPUT_SIZE);
       strcpy(line,s);
       line[strlen(line)] = '\n'; //terminate with new line
-      puts(line);
+      // puts(line);
       tokens = tokenize(line);
 
       parser(tokens); // parser is called
       int i;
-      //do whatever you want with the commands, here we just print them
+      //Freeing up the acquired space by tokens
       for(i=0;tokens[i]!=NULL;i++){
           free(tokens[i]);
       }
